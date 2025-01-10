@@ -1,0 +1,116 @@
+// Module included in the following assemblies:
+//
+// * networking/ovn_kubernetes_network_provider/ovn-kubernetes-migration.adoc
+
+:_mod-docs-content-type: PROCEDURE
+[id="nw-ovn-kubernetes-migration-from-sdn_{context}"]
+= Best practices for migrating to the OVN-Kubernetes plugin from the OpenShift SDN network plugin
+
+Before migrating from the OpenShift SDN network plugin to the OVN-Kubernetes plugin, follow these best practices: 
+
+.Prerequisites
+
+. Check your environment:
++
+* Ensure that the cluster is installed on infrastructure capable of supporting the OVN-Kubernetes network plugin. 
+* Verify that the cluster is in a stable state without errors. All operators should be healthy, and all nodes must be ready. 
+* Confirm that the cluster is not in the process of an upgrade. All nodes should be on the same version.
+* Ensure there are no IP address conflicts among OpenShift cluster nodes.
+* Back up your cluster.
+* Verify that MTU settings are correctly adjusted. Migration will change the MTU from 1450 in SDN to 1400 in OVN-Kubernetes. 
+
+. Configure UDP packet:
++
+* On all platforms, ensure that UDP packets on port 6081 are allowed for all nodes: 
+** For cloud platforms: Ensure the appropriate security group rule is in place. 
+** For on-premises/bare-metal platforms: Open UDP port 6081 in the firewall with high priority. 
+
+. Address Third-Party Webhook issues:
++
+* Identify and resolve any third-party webhook issues that might cause migration failure. 
+* Back up the webhook and temporarily delete it if necessary. 
+
+. Know OVN-Kubernetes IP address ranges:
++
+* Be aware of the OVN-Kubernetes IP address ranges: `100.64.0.0/16`, `169.254.169.0/29`, `100.88.0.0/16`, `fd98::/64`, `fd69::/125`, and `fd97::/64`. Avoid including these IP ranges in any other CIDR definitions. 
+
+. Configurae the control plane:
++
+* If the secondary interface IP is used to configure the OpenShift Container Platform control plane nodes, verify that the OVN interface has a default gateway. 
+
+. Configure NODEIP_HINT: 
++
+* If `NODEIP_HINT` is not configured, OVN will set up its bridge (br-ex) on the default interface. 
+
+. Configure clusters that use static routes:
++
+* For clusters that rely on static routes and/or routing policies in the host network, set `routingViaHost` to true.
+* Set `ipForwarding` to Global in `gatewayConfig` during migration to offload routing decisions to the host kernel.
+
+.Procedure
+
+== Example Patch
+
+Apply the following patch before the 5th step in the SDN to OVN migration documentation:
+
+[source,terminal]
+----
+$ oc patch Network.operator.openshift.io cluster --type=merge / --patch '{ <1>
+    "spec": { <2>
+      "defaultNetwork": { <3>
+        "ovnKubernetesConfig": { <4>
+          "gatewayConfig": { <5>
+            "ipForwarding": "Global", <6>
+            "routingViaHost": true <7>
+    }}}}}'
+----
+<1> The`oc` (OpenShift CLI) tool to apply a patch to the `Network.operator.openshift.io` resource named `cluster`. The `--type=merge` option specifies that the patch will merge the specified changes into the existing resource.
+<2> The `spec` key defines the specifications of the `Network` resource.
+<3> The `defaultNetwork` key defines the default network configuration for the cluster.
+<4> The `ovnKubernetesConfig` key defines configuration attributes that are specific to OVN Kubernetes.
+<5> The `gatewayConfig` key defines the OVN gateway settings.
+<6> The `ipForwarding` key with a value of `Global` enables IP forwarding globally, allowing packets to be forwarded through the gateway.
+<7> The `routingViaHost` key with a value of `true` enables routing via the host, which means that the OVN gateway will route traffic through the host network.
+
+== Diagnostic Steps
+
+You can test DNS resolution from each node to each DNS pod before and after migration. This helps verfiy that DNS functionality is consistent and working correctly across the cluster.
+
+To compare results, run the following loop before and after migration:
+
+[source,terminal]
+----
+dns_pods=$(oc get pod -l dns.operator.openshift.io/daemonset-dns=default -o wide --no-headers -n openshift-dns | awk '{print $6}') <1>
+nodes=$(oc get nodes --no-headers | awk '{print $1}') <2>
+for podIP in $dns_pods; do <3>
+  for node in $nodes; do
+    echo "Querying from $node to DNS pod $podIP"
+    oc debug node/$node -- chroot /host dig @$podIP -p 5353 kubernetes.default.svc.cluster.local. +short 2>/dev/null
+    echo
+  done <4>
+done
+----
+<1> Get the IPs of the DNS pods.
+<2> Get the node names.
+<3> Loop through each DNS pod IP.
+<4> Loop through each node.
+
+== Verify Webhook Configuration
+
+After migration, you can ensure that your configuration is functioning properly by checking your mutating webhook and validating webhook configuration.
+
+To verify your webhook configuration, run the following scripts:
+
+* Check the mutating webhook configuration:
++
+[source,terminal]
+----
+$ oc get mutatingwebhookconfiguration
+----
+
+* Check the validating webhook configuration:
++
+[source,terminal]
+----
+$ oc get validatingwebhookconfiguration
+----
