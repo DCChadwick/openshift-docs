@@ -1,0 +1,11 @@
+// Module included in the following assemblies:
+//
+// * networking/understanding-networking.adoc
+
+:_mod-docs-content-type: CONCEPT
+[id="nw-understanding-networking-dns_{context}"]
+= The Domain Name System (DNS)
+
+DNS (Domain Name System) is a hierarchical and decentralized naming system used to translate human-friendly domain names (like www.example.com) into IP addresses that computers use to identify each other on the network. Essentially, DNS acts like the phonebook of the internet. DNS plays a crucial role in service discovery and name resolution.
+
+OpenShift provides a built-in DNS to ensure that services can be reached by their DNS names. This helps maintain stable communication even if the underlying IP addresses change. When a pod is started, environment variables for service names, IPs, and ports are created automatically, enabling the pod to communicate with other services.

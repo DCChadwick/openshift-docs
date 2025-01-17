@@ -1,0 +1,53 @@
+// Module included in the following assemblies:
+//
+// * networking/understanding-networking.adoc
+
+:_mod-docs-content-type: CONCEPT
+[id="nw-understanding-networking-features_{context}"]
+= Networking features
+
+{product-title} offers several networking features and enhancements:
+
+* Ingress operator and Router API
+
+{product-title} includes an Ingress Operator that implements the IngressController API. This component enables external access to cluster services by deploying and managing HAProxy-based Ingress Controllers, allowing for advanced routing configurations and load balancing. {product-title} uses the Route API to translate upstream Ingress objects to route objects. Routes are specific to networking in OpenShift, but the API also allows for the use of third-party ingress controllers, providing flexibility to run multiple ingress solutions.
+
+* Enhanced Security
+
+OpenShift provides advanced network security features, such as Network Policies and Security Context Constraints (SCCs), which help in securing communication between pods and enforcing access controls.
+
+* Role-Based Access Control (RBAC)
+
+OpenShift extends Kubernetes RBAC to provide more granular control over who can access and manage network resources. This helps in maintaining security and compliance within the cluster.
+
+* Multi-Tenancy Support
+
+OpenShift offers robust multi-tenancy support, allowing multiple users or teams to share the same cluster while keeping their resources isolated and secure.
+
+* Hybrid and Multi-Cloud Capabilities
+
+OpenShift is designed to work seamlessly across on-premise, cloud, and multi-cloud environments. This flexibility allows organizations to deploy and manage containerized applications across different infrastructures.
+
+* Observability and Monitoring
+
+OpenShift provides integrated observability and monitoring tools that help in managing and troubleshooting network issues. This includes role-based access to network metrics and logs.
+
+* Enhanced Security
+
+OpenShift provides advanced network security features, such as Network Policies and Security Context Constraints (SCCs), which help in securing communication between pods and enforcing access controls.
+
+* Role-Based Access Control (RBAC)
+
+OpenShift extends Kubernetes RBAC to provide more granular control over who can access and manage network resources. This helps in maintaining security and compliance within the cluster.
+
+* Multi-Tenancy Support
+
+OpenShift offers robust multi-tenancy support, allowing multiple users or teams to share the same cluster while keeping their resources isolated and secure.
+
+* Hybrid and Multi-Cloud Capabilities
+
+OpenShift is designed to work seamlessly across on-premise, cloud, and multi-cloud environments. This flexibility allows organizations to deploy and manage containerized applications across different infrastructures.
+
+* Observability and Monitoring
+
+OpenShift provides integrated observability and monitoring tools that help in managing and troubleshooting network issues. This includes role-based access to network metrics and logs.

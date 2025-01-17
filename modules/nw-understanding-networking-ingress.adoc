@@ -1,0 +1,14 @@
+// Module included in the following assemblies:
+//
+// * networking/understanding-networking.adoc
+
+:_mod-docs-content-type: CONCEPT
+[id="nw-understanding-networking-ingress_{context}"]
+= Ingressa
+
+Ingress is a Kubernetes resource that provides more advanced routing capabilities, including load balancing, SSL termination, and name-based virtual hosting. Here are some key points about Ingress:
+
+* **HTTP/HTTPS Routing**: Ingress allows you to define rules for routing HTTP and HTTPS traffic to services within the cluster. 
+* **Load Balancing**: Ingress Controllers, such as NGINX or HAProxy, handle the actual routing and load balancing of traffic based on the defined rules. 
+* **SSL Termination**: Ingress Controllers can handle SSL termination, decrypting incoming SSL/TLS traffic before passing it to the backend services. 
+* **Multiple Domains and Paths**: Ingress supports routing traffic for multiple domains and paths, making it suitable for complex web applications. 

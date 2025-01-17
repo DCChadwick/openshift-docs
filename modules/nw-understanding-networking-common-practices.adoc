@@ -1,0 +1,15 @@
+// Module included in the following assemblies:
+//
+// * networking/understanding-networking.adoc
+
+:_mod-docs-content-type: CONCEPT
+[id="nw-understanding-networking-common-practices_{context}"]
+= Common practices
+
+In {product-title}, services create a single IP address for clients to use, even if multiple pods are providing that service. This abstraction enables seamless scaling, fault tolerance, and rolling upgrades without affecting clients.
+
+Network security policies play a crucial role in managing traffic within the cluster. Network controls empower namespace administrators to define ingress and egress rules for their pods. Network administration policies allow cluster administrators to establish boundaries for namespaces, override namespace policies, or set default policies when none are defined.
+
+Egress firewall configurations control outbound traffic from pods, ensuring that only authorized communication occurs. The Ingress node firewall protects nodes by controlling incoming traffic. Additionally, the Universal Data Network (UDN) offers a robust solution for managing data traffic across the cluster.
+
+These practices collectively enhance the security, scalability, and reliability of applications running in your environment.
