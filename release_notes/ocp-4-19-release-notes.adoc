@@ -2911,6 +2911,12 @@ After you run the command, the CNO collects `must-gather` logs that you can insp
 +
 There is no supported workaround for this issue. (link:https://issues.redhat.com/browse/OCPBUGS-57440[OCPBUGS-57440])
 
+* The `istiod` component, which supports Gateway API, previously created an `istio-ca-root-cert` ConfigMap in all namespaces watched by OpenShift Service Mesh (OSSM). A fix is included in OSSM 3.0.1 (part of {product-title} {product-version}) that limits this behavior, so ConfigMaps are only created in namespaces that contain a Gateway API resource. However, this fix does not automatically clean up existing ConfigMaps from namespaces that do not contain a Gateway. As a result, clusters might still contain numerous unnecessary `istio-ca-root-cert` ConfigMaps after an upgrade. These extra ConfigMaps are benign and can be safely ignored, or they can be manually deleted from namespaces that do not host a Gateway. (link:https://issues.redhat.com/browse/OCPBUGS-XXXX[OCPBUGS-XXXX])
+
+* When the same hostname is specified in two or more different `Gateway` resources, the system does not report a conflict. The upstream Gateway API specification, which treats each `Gateway` as a separate, independent proxy. This is the intended behavior of the upstream Gateway API specification. The cluster will not prevent this configuration. The routing of traffic to a specific Gateway is determined by external configuration, such as which Gateway's service IP address is used in the DNS record for the hostname. (link:https://issues.redhat.com/browse/NE-2180[NE-2180])
+
+* Gateway API is not supported on on-premise platforms, including Bare Metal, vSphere, Nutanix, KubeVirt, and clusters using the `None` platform type. The Gateway API implementation automatically creates a service of `type: LoadBalancer`. On-premise platforms do not have a default cloud controller manager or other provisioner to assign an external IP address to this service. As a result, the `Gateway` resource will never be marked as "accepted" and will remain inaccessible from outside the cluster. (link:https://issues.redhat.com/browse/OCPBUGS-XXXX[OCPBUGS-XXXX])
+
 [id="ocp-telco-ran-4-19-known-issues_{context}"]
 
 * In the event of a crash, the `mlx5_core` NIC driver causes an out-of-memory issue and `kdump` does not save the `vmcore` file in `/var/crash`.
