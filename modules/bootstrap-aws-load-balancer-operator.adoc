@@ -2,58 +2,34 @@
 // * networking/installing-albo-sts-cluster.adoc
 
 :_mod-docs-content-type: PROCEDURE
-[id="nw-bootstra-albo-on-sts-cluster_{context}"]
-= Bootstrapping AWS Load Balancer Operator on Security Token Service cluster
+[id="creating-aws-iam-role-ccoctl_{context}"]
+= Creating an IAM role for the AWS Load Balancer Operator
 
-.Prerequisites
-
-* You must extract and prepare the `ccoctl` binary.
+An additional AWS IAM role is required to successfully install the AWS Load Balancer Operator on a cluster that uses STS. You can use the Cloud Credential Operator utility (`ccoctl`) to create this role.
 
 .Procedure
 
-. Create the `aws-load-balancer-operator` namespace by running the following command:
+. Download the `CredentialsRequest` custom resource (CR) and store it in a directory by running the following command:
 +
 [source,terminal]
 ----
-$ oc create namespace aws-load-balancer-operator
+$ oc adm release extract --credentials-requests \
+   --cloud=aws \
+   --to=<path_to_directory_with_list_of_cr_requests> \
+   quay.io/openshift-release-dev/ocp-release:4.13.x-x86_64 <1>
 ----
+<1> Replace `4.13.x` with the specific version of your cluster.
 
-. Download the `CredentialsRequest` custom resource (CR) of the AWS Load Balancer Operator, and create a directory to store it by running the following command:
-+
-[source,terminal]
-----
-$ curl --create-dirs -o <path-to-credrequests-dir>/cr.yaml https://raw.githubusercontent.com/openshift/aws-load-balancer-operator/main/hack/operator-credentials-request.yaml
-----
-
-. Use the `ccoctl` tool to process `CredentialsRequest` objects of the AWS Load Balancer Operator, by running the following command:
+. Use the `ccoctl` utility to create an AWS IAM role by running the following command:
 +
 [source,terminal]
 ----
 $ ccoctl aws create-iam-roles \
-    --name <name> --region=<aws_region> \
-    --credentials-requests-dir=<path-to-credrequests-dir> \
-    --identity-provider-arn <oidc-arn>
+   --name <name> \ <1>
+   --region=<aws_region> \
+   --credentials-requests-dir=<path_to_directory_with_list_of_cr_requests> \
+   --identity-provider-arn=arn:aws:iam::<aws_account_id>:oidc-provider/<oidc_issuer_url>
 ----
+<1> `<name>` is the name used to tag the cloud resources created by `ccoctl`. You can use the infrastructure ID of your cluster.
 
-. Apply the secrets generated in the manifests directory of your cluster by running the following command:
-+
-[source,terminal]
-----
-$ ls manifests/*-credentials.yaml | xargs -I{} oc apply -f {}
-----
-
-. Verify that the credentials secret of the AWS Load Balancer Operator is created by running the following command:
-+
-[source,terminal]
-----
-$ oc -n aws-load-balancer-operator get secret aws-load-balancer-operator --template='{{index .data "credentials"}}' | base64 -d
-----
-+
-.Example output
-[source,terminal]
-----
-[default]
-sts_regional_endpoints = regional
-role_arn = arn:aws:iam::999999999999:role/aws-load-balancer-operator-aws-load-balancer-operator
-web_identity_token_file = /var/run/secrets/openshift/serviceaccount/token
-----
+. Note the **Amazon Resource Name (ARN)** of the AWS IAM role created for the AWS Load Balancer Operator from the output (e.g., `arn:aws:iam::777777777777:role/<name>-aws-load-balancer-operator-aws-load-balancer-operator`).

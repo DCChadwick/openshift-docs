@@ -1,16 +1,32 @@
 :_mod-docs-content-type: ASSEMBLY
 [id="albo-sts-cluster"]
-= Preparing for the AWS Load Balancer Operator on a cluster using the AWS {sts-full}
+= Preparing an AWS STS cluster for the AWS Load Balancer Operator
 include::_attributes/common-attributes.adoc[]
 :context: albo-sts-cluster
 
 toc::[]
 
-You can install the AWS Load Balancer Operator on a cluster that uses STS. Follow these steps to prepare your cluster before installing the Operator.
+You can install the Amazon Web Services (AWS) Load Balancer Operator on a cluster that uses the Security Token Service (STS). Follow these steps to prepare your cluster before installing the Operator.
 
-The AWS Load Balancer Operator relies on the `CredentialsRequest` object to bootstrap the Operator and the AWS Load Balancer Controller. The AWS Load Balancer Operator waits until the required secrets are created and available. The Cloud Credential Operator does not provision the secrets automatically in the STS cluster. You must set the credentials secrets manually by using the `ccoctl` binary.
+The AWS Load Balancer Operator relies on the `CredentialsRequest` object to bootstrap the Operator and the AWS Load Balancer Controller. The AWS Load Balancer Operator waits until the required secrets are created and available.
 
-If you do not want to provision credential secret by using the Cloud Credential Operator, you can configure the `AWSLoadBalancerController` instance on the STS cluster by specifying the credential secret in the AWS load Balancer Controller custom resource (CR).
+[id="prerequisites-sts-albo_{context}"]
+== Prerequisites
+
+* You have installed the OpenShift CLI (`oc`).
+* You have extracted and prepared the `ccoctl` binary.
+* You know the infrastructure ID of your cluster. To find this ID, run the following command:
++
+[source,terminal]
+----
+$ oc get -o jsonpath='{.status.infrastructureName}{"\n"}' infrastructure cluster
+----
+* You know the OpenID Connect (OIDC) DNS information for your cluster. To find this information, run the following command:
++
+[source,terminal]
+----
+$ oc get authentication cluster -o jsonpath='{.spec.serviceAccountIssuer}'
+----
 
 include::modules/bootstrap-aws-load-balancer-operator.adoc[leveloffset=+1]
 
