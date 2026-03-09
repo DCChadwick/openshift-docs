@@ -1,0 +1,70 @@
+:_mod-docs-content-type: PROCEDURE
+[id="configuring-listener-routing-security_{context}"]
+= Configure listener routing and security settings
+
+[role="_abstract"]
+To ensure that your applications receive only legitimate and safe traffic, you must specify the allowed protocols, ports, and secure connections for your gateway. You can define these parameters by configuring the `spec.listeners` field in your `Gateway` custom resource (CR).
+
+.Procedure
+
+. Create a YAML file that defines your `Gateway` object and its listeners. You can customize the `spec.listeners` field with the following settings:
++
+--
+* Port and protocol: Define the network port and protocol, such as `80`/`HTTP` or `443`/`HTTPS`, that the listener uses.
+* TLS configuration: Specify the TLS settings for secure communication, including the mode (currently, only `Terminate` is supported on {product-title}) and the Kubernetes secret containing the certificate keypair.
+* Hostnames: Define the hostnames, such as `www.example.com` or `example.com`, that the listener matches for incoming requests.
+* Allowed routes: Control which `Route` resources can attach to this listener:
+** `All`: Accepts attachments from routes in any namespace.
+** `Selector`: Accepts attachments from routes in namespaces that match a specified label selector.
+** `Same`: Not supported by the Gateway API on {product-title}.
+--
+
+. Review the following example configuration, which creates a `Gateway` object with both HTTP and HTTPS listeners:
++
+[source,yaml]
+----
+kind: Gateway
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: my-gateway
+  namespace: openshift-ingress
+spec:
+  gatewayClassName: openshift-default
+  listeners:
+  - protocol: HTTP 
+    port: 80
+    name: http
+    allowedRoutes: 
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            env: "dev"
+  - protocol: HTTPS 
+    port: 443
+    name: https
+    hostname: "*.mydomain.tld" 
+    tls: 
+      mode: Terminate
+      certificateRefs:
+        - name: listener-cert
+          kind: Secret
+    allowedRoutes: 
+      namespaces:
+        from: All
+----
++
+* `spec.listeners` defines the list of listeners for the Gateway. This snippet defines two listeners, one for HTTP and one for HTTPS.
+* `protocol: HTTP` accepts HTTP traffic on port `80`. Since no hostname is specified, it routes any traffic that can attach to it.
+* `allowedRoutes` for the HTTP listener only allows `HTTPRoute` resources from namespaces that have the `env: "dev"` label.
+* `protocol: HTTPS` accepts HTTPS traffic on port `443`.
+* `hostname` matches only requests for hostnames ending in `mydomain.tld` (for example, `www.mydomain.tld` or `api.mydomain.tld`).
+* `tls` terminates TLS at the Gateway using a certificate stored in a Kubernetes `Secret` called `listener-cert`.
+* `allowedRoutes` for the HTTPS listener allows `HTTPRoute` resources from any namespace to attach.
+
+. Apply the `Gateway` configuration by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----
