@@ -1,0 +1,29 @@
+:_mod-docs-content-type: CONCEPT
+[id="understand-gateway-address-assignment_{context}"]
+= Understand gateway address assignment and types
+
+[role="_abstract"] 
+When you plan the network presence for your gateway, you must understand how {product-title} assigns hostnames and IP addresses. Understanding these mechanics ensures that you can configure your DNS and load balancers correctly without triggering configuration errors.
+
+The Gateway API uses the `addresses` field to define the specific network locations that are requested or assigned to your `Gateway` resource. This field interacts with your resource in two ways:
+
+`spec.addresses`::
+Used to request specific network addresses for a gateway instance. If you leave this field blank, the controller attempts to assign addresses automatically.
+
+`status.addresses`::
+Populated by the controller to list the actual, active addresses assigned to the gateway.
+
+[IMPORTANT]
+====
+In {product-title} manual deployments, you cannot define addresses in the `spec.addresses` field. You must omit this field from your configuration and rely on the controller to automatically provision the address and populate the `status.addresses` field. If you attempt to request a specific address manually, or if a requested configuration cannot be achieved, the gateway enters an error state.
+====
+
+Address types
+
+When an address is assigned to your gateway, it uses one of the following primary types to specify how the gateway is provisioned or linked:
+
+`Hostname`::
+Represents a DNS-based ingress point. This concept is typically used for cloud load balancers where a DNS name exposes the load balancer.
+
+`IPAddress`::
+A textual representation of a numeric IP address. You must use dotted-decimal form for IPv4 or standard text representation for IPv6. This type only supports specific static IP addresses requested for the load balancing infrastructure. Address ranges or CIDR blocks, such as `127.0.0.0/24`, are invalid.
