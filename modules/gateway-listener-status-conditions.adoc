@@ -1,0 +1,89 @@
+:_mod-docs-content-type: REFERENCE
+[id="gateway-listener-status-conditions_{context}"]
+= Gateway and listener status conditions reference
+
+[role="_abstract"]
+To verify that your gateway is properly configured in the data plane and ready to route traffic, you must review both the gateway-level and listener-level status conditions. 
+
+A `Gateway` resource is considered healthy when its `Accepted` and `Programmed` conditions report a status of `True`. Additionally, its listeners must also report `True` for `Accepted`, `Programmed`, and `ResolvedRefs`. 
+
+[IMPORTANT]
+====
+The `Conflicted` and `Detached` listener conditions use negative polarity. This means that a status of `False` indicates a healthy state, while a status of `True` indicates an error.
+====
+
+.Gateway-level status conditions
+[cols="1,1,3",options="header"]
+|===
+|Condition |Status |Description and common reasons
+
+|`Accepted`
+|`True`
+|The gateway configuration is valid and working properly.
+
+|`Accepted`
+|`False`
+|The configuration has errors. Common reasons include `ListenersNotValid` (one or more listeners have issues) or `InvalidParameters` (the configuration is invalid).
+
+|`Accepted`
+|`Unknown`
+|The controller has not evaluated the gateway yet.
+
+|`Programmed`
+|`True`
+|The infrastructure is provisioned and the gateway is configured in the data plane, such as a load balancer or proxy.
+
+|`Programmed`
+|`False`
+|Programming failed or the data plane is not ready. Common reasons include `NoResources` (insufficient resources or pods unavailable), `Invalid` (cannot apply to the data plane), or `Pending`.
+
+|`Programmed`
+|`Unknown`
+|Programming is currently in progress.
+|===
+
+.Listener-level status conditions
+[cols="1,1,3",options="header"]
+|===
+|Condition |Status |Description and common reasons
+
+|`Accepted`
+|`True`
+|The listener configuration is valid and working properly.
+
+|`Accepted`
+|`False`
+|The listener configuration has errors.
+
+|`Programmed`
+|`True`
+|The listener is successfully configured in the data plane.
+
+|`Programmed`
+|`False`
+|The listener configuration failed in the data plane.
+
+|`ResolvedRefs`
+|`True`
+|All references, such as TLS certificates, are found and valid.
+
+|`ResolvedRefs`
+|`False`
+|At least one reference is invalid. Common reasons include `InvalidCertificateRef` (a TLS certificate was not found or is invalid) or `RefNotPermitted` (a cross-namespace reference is not allowed).
+
+|`Conflicted` (Negative polarity)
+|`False`
+|Healthy state. There are no conflicts.
+
+|`Conflicted` (Negative polarity)
+|`True`
+|The listener conflicts with another listener. Common reasons include `ProtocolConflict` (multiple listeners on the same port with incompatible protocols) or `HostnameConflict` (overlapping hostnames).
+
+|`Detached` (Negative polarity)
+|`False`
+|Healthy state. The listener can successfully accept route attachments.
+
+|`Detached` (Negative polarity)
+|`True`
+|The listener cannot accept route attachments.
+|===
