@@ -6,6 +6,7 @@
 [id="microshift-low-latency-tuned-auto-activate_{context}"]
 = Automatically enable the {microshift-short} TuneD profile
 
+[role="_abstract"]
 Included in the `microshift-low-latency` RPM package is a systemd service that you can configure to automatically enable a TuneD profile when the system starts. This ability is particularly useful if you are installing {microshift-short} in a large fleet of devices.
 
 .Prerequisites
@@ -19,14 +20,16 @@ Included in the `microshift-low-latency` RPM package is a systemd service that y
 
 . Configure the `tuned.yaml` in the `/etc/microshift/` directory, for example:
 +
-.Example tuned.yaml
+Example `tuned.yaml`:
++
 [source,yaml]
 ----
-profile: microshift-baseline <1>
-reboot_after_apply: True <2>
+profile: microshift-baseline 
+reboot_after_apply: True 
 ----
-<1> Controls which TuneD profile is activated. In this example, the name of the profile is `microshift-baseline`.
-<2> Controls whether the host must be rebooted after applying the profile. Valid values are `True` and `False`. For example, use the `True` setting to automatically restart the host after a new `ostree` commit is deployed.
++
+`profile`:: Controls which TuneD profile is activated. In this example, the name of the profile is `microshift-baseline`.
+`reboot_after_apply`:: Controls whether the host must be rebooted after applying the profile. Valid values are `True` and `False`. For example, use the `True` setting to automatically restart the host after a new `ostree` commit is deployed.
 +
 [IMPORTANT]
 ====

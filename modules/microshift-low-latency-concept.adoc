@@ -6,6 +6,7 @@
 [id="microshift-low-latency-concept_{context}"]
 = Lowering latency in {microshift-short} applications
 
+[role="_abstract"]
 Latency is defined as the time from an event to the response to that event. You can use low latency configurations and tuning in a {microshift-short} node running in an operational or software-defined control system where an edge device has to respond quickly to an external event. You can fully optimize low latency performance by combining {microshift-short} configurations with operating system tuning and workload partitioning.
 
 [IMPORTANT]
