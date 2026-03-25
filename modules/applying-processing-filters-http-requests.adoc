@@ -1,0 +1,80 @@
+:_mod-docs-content-type: PROCEDURE
+[id="applying-processing-filters-http-requests_{context}"]
+= Applying processing filters to HTTP requests
+
+[role="_abstract"]
+When a request hits your route, you can apply processing directions to the HTTP request, such as modifying headers or redirecting to another URL, by configuring filters. You can specify up to 16 filters for a single rule. 
+
+You can generally combine multiple filters to achieve advanced processing results. However, the `urlRewrite` and `requestRedirect` filters are mutually exclusive and cannot be used in combination.
+
+You can apply the following filter types:
+
+`requestRedirect`::
+Responds to an HTTP request with an HTTP 3xx code, which instructs the client to retrieve another URL. You can configure optional fields including `scheme`, `hostname`, `path`, `port`, and `statusCode`. Supported status codes are 301, 302, 303, 307, or 308.
+
+`requestHeaderModifier`::
+Modifies the headers of an HTTP request You can specify only one modifier per header, and multiple values for a single header must be comma-separated. You can list up to 16 header filters using the `set`, `add`, or `remove` fields.
+
+`responseHeaderModifier`::
+Available on {SMProductName}, this filter modifies the headers of an HTTP response. It uses the exact same constraints and fields as the `requestHeaderModifier` filter.
+
+`requestMirror`::
+Available on {SMProductName}, this filter mirrors, or duplicates, requests to a specified `backendRef`. You can optionally specify a `percent` or `fraction` field to dictate the portion of requests to mirror. If omitted, 100% of the requests are mirrored.
+
+`urlRewrite`::
+Available on {SMProductName}, this filter modifies the hostname, path, or both for an HTTP request. It uses the same path semantics as the `requestRedirect` filter. 
+
+.Prerequisites
+
+* You have access to the cluster as a user with the `cluster-admin` role.
+* You have installed the {oc-first}.
+
+.Procedure
+
+. Create or edit an `HTTPRoute` YAML file to include your desired processing directives under the `spec.rules.filters` field. 
++
+--
+The following example demonstrates how to configure a `requestRedirect` filter that issues a permanent redirect (301) from HTTP to HTTPS:
+
+[source,yaml]
+----
+spec:
+  hostnames:
+  - redirect.mycompany.com
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+----
+
+The following example demonstrates how to configure a `requestHeaderModifier` filter that adds a new header, modifies an existing header, and removes a specific header:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: my-header-name
+          value: my-header-value
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        set:
+        - name: old-header
+          value: new-header-value
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        remove: ["x-request-id"]
+----
+--
+
+. Apply the `HTTPRoute` resource by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----

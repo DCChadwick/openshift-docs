@@ -1,0 +1,54 @@
+:_mod-docs-content-type: PROCEDURE
+[id="configuring-routing-destinations-weights_{context}"]
+= Configuring routing destinations and traffic weights
+
+[role="_abstract"]
+When you route traffic to your backends, you must define service destinations and traffic weights to distribute requests across your applications. `BackendRefs` are the service destinations for requests that meet your configured match rules.
+
+A `backendRef` is composed of `group`, `kind`, `name`, `namespace`, `port`, and `weight` fields. The `name` and `port` fields are the only required fields. They refer directly to the service name and the service port number. If a rule does not have a `backendRef`, it does not forward any requests and might return an error.
+
+When your rule contains more than one `backendRef`, the `weight` field becomes relevant. The `weight` specifies the proportion of requests that the route forwards to that specific backend destination. While not strictly required, it is recommended to configure your weights so they add up to 100 whenever possible for clarity.
+
+.Prerequisites
+
+* You have access to the cluster as a user with the `cluster-admin` role.
+* You have installed the {oc-first}.
+
+.Procedure
+
+. Create or edit an `HTTPRoute` YAML file to include your desired service destinations under the `spec.rules.backendRefs` field.
++
+--
+The following example demonstrates a single backend destination that routes traffic to a service named `foo-v1`:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - backendRefs:
+    - name: foo-v1
+      port: 8080
+----
+
+The following example demonstrates two backend destinations that use weighted delivery. In this configuration, `foo-v1` receives 15/40 of the traffic, and `foo-v2` receives 25/40 of the traffic:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - backendRefs:
+    - name: foo-v1
+      port: 8080
+      weight: 15
+    - name: foo-v2
+      port: 8080
+      weight: 25
+----
+--
+
+. Apply the `HTTPRoute` resource by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----

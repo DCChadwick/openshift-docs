@@ -1,0 +1,72 @@
+:_mod-docs-content-type: PROCEDURE
+[id="setting-timeouts-http-requests_{context}"]
+= Setting timeouts for HTTP requests
+
+[role="_abstract"]
+When you configure routing, you can set strict timeouts for the entire request and the backend hop to prevent hanging connections and ensure your application remains responsive. There are two types of timeouts you can configure for an `HTTPRoute`: `request` and `backendRequest`.
+
+The `request` timeout covers the total time to send a request and then get a response back to the client. It represents the duration of the entire request-response transaction. 
+
+The `backendRequest` timeout covers the time for a request to travel from the gateway to the backend, and for a response to be received. Extending the timeout for a `backendRequest` can be helpful if the gateway needs to retry connections to a backend.
+
+When configuring timeouts, you must adhere to the following formatting rules and constraints:
+
+* The value of a `backendRequest` cannot be greater than the value of the `request` timeout.
+* If specified, a timeout value must be `0` or `>= 1ms`. 
+* A zero-valued timeout (`0`) means there is no timeout.
+* Timeouts use a string format that starts with a number and expresses hours (`h`), minutes (`m`), seconds (`s`), or milliseconds (`ms`).
+* The number can be up to five digits, such as `10000s`. 
+* You can use multipart durations to express fractions, such as `1m30s`, but you cannot use decimal dots.
+
+.Prerequisites
+
+* You have access to the cluster as a user with the `cluster-admin` role.
+* You have installed the {oc-first}.
+
+.Procedure
+
+. Create or edit an `HTTPRoute` YAML file to include your desired timeout configurations under the `spec.rules.timeouts` field.
++
+--
+The following example demonstrates a configuration where the entire request must complete within 30 seconds:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /timeout
+    timeouts:
+      request: 30s
+    backendRefs:
+    - name: timeout-svc
+      port: 8080
+----
+
+The following example demonstrates a configuration where the entire request must succeed within 5 seconds, and the gateway-to-backend hop must complete within 1 second:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /timeout
+    timeouts:
+      request: 5s
+      backendRequest: 1s
+    backendRefs:
+    - name: timeout-svc
+      port: 8080
+----
+--
+
+. Apply the `HTTPRoute` resource by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----

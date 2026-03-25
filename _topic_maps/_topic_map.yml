@@ -1792,6 +1792,8 @@ Topics:
       File: ingress-controller-dnsmgt
     - Name: Gateway API with OpenShift Container Platform networking
       File: ingress-gateway-api
+    - Name: Routing HTTP requests to services
+      File: routing-http-requests-to-services
   - Name: Load balancing on OpenStack
     File: load-balancing-openstack
   - Name: Load balancing with MetalLB

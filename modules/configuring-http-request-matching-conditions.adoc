@@ -1,0 +1,72 @@
+:_mod-docs-content-type: PROCEDURE
+[id="configuring-http-request-matching-conditions_{context}"]
+= Configuring HTTP request matching conditions
+
+[role="_abstract"]
+When multiple services share a gateway, you can define request matching conditions to ensure traffic is routed to the correct application based on paths, headers, query parameters, or HTTP methods. Matches define the specific conditions used for matching a rule against incoming HTTP requests.
+
+If you do not specify a match, then all HTTP requests are matched, depending on the configured hostname. A single rule can contain up to 64 matches. Each match operates independently; the rule is matched if any single match of that type is satisfied. You can also combine multiple match types within a rule, such as combining a path and a header, all of which must be true for the HTTP request to successfully match.
+
+You can configure the following match types:
+
+`path`::
+Consists of a type and a value. The match type indicates how to evaluate the value and can be either `Exact` or `PathPrefix`. `PathPrefix` is the default type. If omitted, the default path value is `/`. On {SMProductName}, you can also use `RegularExpression` as a type.
+
+`headers`::
+Consists of a type, name, and value. The header match type indicates how to evaluate the value and can be `Exact`, which is the default, or `RegularExpression` on {SMProductName}. The `name` is the HTTP header name, which must be case-insensitive. The `value` is the specific HTTP header value to be matched.
+
+`queryParameters`::
+Consists of a type, name, and value. The query parameter match type indicates how to evaluate the value and can be `Exact`, which is the default, or `RegularExpression` on {SMProductName}. The `name` is the HTTP query parameter name and must match exactly. The `value` is the specific HTTP query parameter value to be matched.
+
+`method`::
+An uppercase value that must match the HTTP request method. Valid values are `GET`, `HEAD`, `POST`, `PUT`, `DELETE`, `CONNECT`, `OPTIONS`, `TRACE`, or `PATCH`.
+
+.Prerequisites
+
+* You have access to the cluster as a user with the `cluster-admin` role.
+* You have installed the {oc-first}.
+
+.Procedure
+
+. Create or edit an `HTTPRoute` YAML file to include your desired match conditions under the `spec.rules.matches` field. 
++
+--
+The following example demonstrates how to configure path-based matching to route a `/my-app` path to a backend service:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /my-app
+    backendRefs:
+    - name: my-app-backend
+      port: 8080
+----
+
+The following example demonstrates how to combine multiple header matches so that the request must contain both `myheader: newheader` AND `color: orange` to successfully match:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - matches:
+    - headers:
+      - name: myheader
+        value: newheader
+      - name: color
+        value: orange
+    backendRefs:
+    - name: my-app-service2
+      port: 8080
+----
+--
+
+. Apply the `HTTPRoute` resource by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----

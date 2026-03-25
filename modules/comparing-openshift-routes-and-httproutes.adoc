@@ -1,0 +1,55 @@
+:_mod-docs-content-type: REFERENCE
+[id="comparing-openshift-routes-and-httproutes_{context}"]
+= Comparing {product-title} routes and HTTPRoutes
+
+[role="_abstract"]
+When you migrate from standard networking to the Gateway API, you can compare {product-title} routes with `HTTPRoute` resources to understand which features are supported and how your configuration must change. While both resources handle ingress traffic, they have distinct feature sets and implementation differences.
+
+The following tables outline the feature availability and implementation differences between standard routes and `HTTPRoute` resources.
+
+.Features exclusive to `HTTPRoute` resources
+[cols="1",options="header"]
+|===
+|Feature
+
+|Multiple hostnames
+|Matches on headers
+|Matches on query parameters
+|Request header modification
+|Request redirect
+|Request mirror
+|===
+
+.Features exclusive to {product-title} routes
+[cols="1",options="header"]
+|===
+|Feature
+
+|IP allow lists
+|Rate limiting on the number of connections
+|Subdomain indication
+|Re-encrypt termination
+|Passthrough termination
+|===
+
+.Shared features and implementation differences
+[cols="1,1,1",options="header"]
+|===
+|Feature |{product-title} route implementation |`HTTPRoute` implementation
+
+|Path matching
+|Similar path matching capabilities.
+|Similar path matching capabilities.
+
+|Backend references
+|Supports backend references for weighted traffic delivery.
+|Supports backend references for weighted traffic delivery.
+
+|Rewrite target
+|Configured using an annotation.
+|Configured using a filter.
+
+|Sharding
+|Configured using metadata labels.
+|Configured using parent references (`parentRefs`).
+|===
