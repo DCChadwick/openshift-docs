@@ -1,0 +1,34 @@
+:_mod-docs-content-type: REFERENCE
+[id="understanding-grpcroute-schema-differences_{context}"]
+= Understanding GRPCRoute schema differences
+
+[role="_abstract"]
+When you migrate upstream `GRPCRoute` configurations to your cluster, you must understand the specific schema differences to avoid validation errors. The {product-title} Cluster Ingress Operator vendors Gateway API v1.2.1 and diverges from the upstream v1.4.0 specification. 
+
+Additionally, the `cluster-ingress-operator` only installs the `GRPCRoute` custom resource definition (CRD) and delegates all runtime semantics to {SMProductName}. Because the operator does not reconcile `GRPCRoute` instances, the data-plane behavior depends entirely on your Service Mesh implementation.
+
+The following table outlines the architectural and schema differences between upstream `GRPCRoute` resources and the {product-title} implementation.
+
+.GRPCRoute schema and implementation differences
+[cols="1,3",options="header"]
+|===
+|Component |Difference
+
+|Rule names
+|{product-title} does not expose the `spec.rules[].name` field. You cannot annotate or deduplicate rule identities. Diagnostics and conformance suites expecting this field might fail.
+
+|Match limits
+|Upstream supports 64 matches per rule, but {product-title} enforces a maximum of eight `matches` per rule. You must distribute complex matching combinations across multiple rules.
+
+|Experimental fields
+|The experimental `sessionPersistence` block is not surfaced. The CRD will reject configurations that include this block or any other fields introduced after Gateway API v1.2.1.
+
+|Required fields
+|Upstream configurations require the `spec` block and the `status.parents[].conditions` field. {product-title} relaxes this requirement, allowing you to omit them and relying on default values.
+
+|Feature gates
+|The `GatewayAPI` feature gate controls the publication of the CRD. The `GatewayAPIController` feature gate controls whether the dependent controllers and the {SMProductName} subscription run. Disabling the controller feature gate leaves the CRD installed without in-cluster controllers acting on the routes.
+
+|Merge semantics
+|Some upstream `x-kubernetes-list-type` hints are missing in the {product-title} schema. This can affect server-side apply (SSA) merge semantics and cause validation errors in certain conformance suites.
+|===

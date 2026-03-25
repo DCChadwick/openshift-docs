@@ -1,0 +1,41 @@
+:_mod-docs-content-type: PROCEDURE
+[id="configuring-routing-destinations-traffic-weights-grpc_{context}"]
+= Configuring routing destinations and traffic weights for gRPC
+
+[role="_abstract"]
+When you route gRPC traffic, you must define backend service destinations and traffic weights to distribute requests across your APIs. `BackendRefs` designate the backend services where matching and filtered gRPC requests are delivered.
+
+You can configure optional backend references for each routing rule. By defining multiple backend references and assigning a `weight` to each, you can control the proportion of gRPC traffic that is forwarded to specific versions of your service. You can also apply rule-scoped filters directly to a specific backend reference.
+
+Because {SMProductName} handles the data-plane behavior, you must ensure that your `GRPCRoute` references an Istio ingress gateway in its `parentRefs` configuration.
+
+.Prerequisites
+
+* You have access to the cluster as a user with the `cluster-admin` role.
+* You have installed the {oc-first}.
+* You have installed {SMProductName} and enabled the necessary Gateway API feature gates.
+
+.Procedure
+
+. Create or edit a `GRPCRoute` YAML file to include your desired service destinations and traffic weights under the `spec.rules.backendRefs` field.
++
+--
+The following example demonstrates routing gRPC traffic to a backend service named `greeter-service` on port `50051` with a specific traffic weight applied:
+
+[source,yaml]
+----
+spec:
+  rules:
+  - backendRefs:
+    - name: greeter-service
+      port: 50051
+      weight: 1
+----
+--
+
+. Apply the `GRPCRoute` resource by running the following command:
++
+[source,terminal]
+----
+$ oc apply -f <filename>.yaml
+----
